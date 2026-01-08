@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\OtpController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,22 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+
+Route::middleware('guest')->group(function () {
+
+    Route::get('/otp', [OtpController::class, 'create'])
+        ->name('otp.create');
+
+    Route::post('/otp/send', [OtpController::class, 'send'])
+        ->name('otp.send');    
+
+    Route::post('/otp/verify', [OtpController::class, 'verify'])
+        ->name('otp.verify');
+});
+
+
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -31,5 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/notes', [NoteController::class, 'index'])->name('note.index');
     Route::post('/note', [NoteController::class, 'store'])->name('note.store');
 });
+
+
+
 
 require __DIR__.'/auth.php';
