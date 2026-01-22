@@ -44,9 +44,20 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/note/create', [NoteController::class, 'create'])->name('note.create');
     Route::get('/notes', [NoteController::class, 'index'])->name('note.index');
     Route::post('/note', [NoteController::class, 'store'])->name('note.store');
+
+
+    Route::get('/task-list', function(){
+
+        return Inertia::render('TaskList/Index');
+
+    });
+
+
+
 });
 
 
