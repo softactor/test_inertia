@@ -36,12 +36,24 @@
 
                         </div>
 
+                    </div>
 
+
+                    <div class="mb-3">
+
+                        <h3 class="fw-bold"> Search</h3>
+
+                        <div class="d-flex gap-2" style="max-width: 750px;">
+                            
+                            <input type="text" class="form-control" v-model="searchText" placeholder="Search by task list name">
+
+                        </div>
 
                     </div>
 
 
-                    <div v-if="taskList.length == 0">
+
+                    <div v-if="filterdSearchTaskList.length == 0">
                          <div class="alert alert-info"> No Task List Found!  </div>
                     </div>
 
@@ -55,7 +67,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(list, index) in taskList" :key="list.id">
+                            <tr v-for="(list, index) in filterdSearchTaskList" :key="list.id">
                                 <th scope="row">{{ index + 1 }}</th>
                                 <td>
                                     <div v-if="editId != list.id">
@@ -71,8 +83,9 @@
                                 <td>{{ list.position }}</td>
                                 <td>
 
-                                    <div v-if="editId != list.id">
+                                    <div v-if="editId != list.id" class="d-flex gap-1">
                                         <button type="button" class="btn btn-sm btn-warning" @click=startEdit(list)>Edit</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @click="deleteTaskList(list)">Delete</button>
                                     </div>
 
 
@@ -83,7 +96,6 @@
                                     
 
 
-                                    <button type="button" class="btn btn-sm btn-danger">Delete</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -104,7 +116,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 
 const page = usePage()
 const userId = page.props.auth?.user.id
@@ -114,6 +126,23 @@ const taskList = ref([])
 const editId = ref('')
 const editName = ref('')
 const newListName = ref('')
+
+const searchText = ref('')
+
+
+const filterdSearchTaskList = computed(() => {
+    const searchKey = searchText.value.trim().toLowerCase()
+
+    if(!searchKey)
+    {
+        return taskList.value
+    }
+
+    return taskList.value.filter((item) => {
+        return (item.name || '').toLowerCase().includes(searchKey)
+    }) 
+
+})
 
 
 
@@ -176,6 +205,37 @@ async function listUpdate(list){
 
     }catch(e){
 
+    }
+
+}
+
+
+async function deleteTaskList(list){
+
+    const deleteId = list.id
+
+    const ok = confirm('Sure to Delete?')
+
+    if(ok)
+    {
+        try{
+            const response = await fetch(`/api/task-lists/${deleteId}`, {
+                method:'DELETE'
+            })
+
+            const responseData = await response.json();
+
+            if(responseData.success)
+            {
+                alert(responseData.message)
+            }
+
+
+            fetchTaskList()
+
+        }catch(e){
+
+        }
     }
 
 }
